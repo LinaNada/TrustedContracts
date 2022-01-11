@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+        <meta charset='utf-8'>
+        <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+        <title>Web 3 Demo</title>
+        <meta name='viewport' content='width=device-width, initial-scale=1'>
+        <script src='https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.0.0-beta.37/dist/web3.min.js'>
+        </script>
+        <script     src="https://code.jquery.com/jquery-3.5.1.min.js"  crossorigin="anonymous"></script>
+        <script src="js/contract.js"></script>
+    </head>
+
+<body class="text-secondary font-weight-light">
+	<nav class="navbar navbar-dark bg-dark">
+	    <a class="navbar-brand" href="#">
+            TrustedContracts
+	    </a>
+		<span class="navbar-brand mb-0"></span>
+	</nav>
+
+    <div class="container mt-5">
+    	<center>
+            <header style="font-size:25px">Initiate a Contract</header>
+            <br>
+            <textarea placeholder="Write your contract here" id="message" style="width: 60%" class="message"></textarea>
+            <br>
+            <br>
+            <input placeholder="Other party's address" id="other-address" style="width: 60%"></input>
+            <br>
+            <br>
+            <button style="width: 60%" id="initiation" onclick="initiate();">Submit to the Blockchain</button>
+	    	
+	    	</br>
+
+    	</center>
+        <hr>
+    </div>
+
+    <div class="container mt-5">
+    	<center>
+            <header style="font-size:25px">Sign a Contract</header>
+            <br>
+            <button style="width: 60%" onclick="previewContract();">View Your Contract</button>
+            <br>
+            <br>
+            <p style="width: 60%" id="preview-contract"></p>
+            <button style="width: 60%" hidden onclick="cosign();" id="cosignButton">Sign The Contract</button>
+	    	
+	    	</br>
+
+    	</center>
+        <hr>
+    </div>    
+<script>
+  async function getCurrentAccount(){
+    const accounts=await window.web3.eth.getAccounts();
+    return accounts[0];
+  }
+
+  async function initiate() {
+    const account=await getCurrentAccount();
+    var theMessage = document.getElementById("message").value;
+    var recipientAddress = document.getElementById("other-address").value;
+    console.log(theMessage)
+    console.log(recipientAddress)
+    await window.myContract.methods.depot(theMessage, recipientAddress).send({from: account});
+        }
+  async function previewContract() {
+    const account=await getCurrentAccount();
+    var preview = await window.myContract.methods.isdepot(account).call();
+    document.getElementById("preview-contract").innerHTML=preview;
+    var showHide = document.getElementById("cosignButton")
+    showHide.removeAttribute("hidden"); 
+  }
+  async function cosign() {
+    const account=await getCurrentAccount();
+    await window.myContract.methods.signit().send({from: account});
+  }
+        
+</script>
+
+    
+    
+
+    <script>
+        var myContract;
+        async function CheckMetamaskConnection() {
+            // Modern dapp browsers...
+            if (window.ethereum) {
+                window.web3 = new Web3(window.ethereum);
+                try {
+                    // Request account access if needed
+                    await ethereum.enable();
+                    // Acccounts now exposed
+                    return true;
+                } catch (error) {
+                    // User denied account access...
+                    return false;
+                }
+            }
+            // Legacy dapp browsers...
+            else if (window.web3) {
+                window.web3 = new Web3(web3.currentProvider);
+                // Acccounts always exposed
+
+                return true;
+            }
+            // Non-dapp browsers...
+            else {
+                console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
+                return false;
+            }
+        }
+
+async function getCurrentAccount(){
+  const accounts=await window.web3.eth.getAccounts();
+  return accounts[0];
+}
+        $(document).ready(async function () {
+            var IsMetamask = await CheckMetamaskConnection();
+            if (IsMetamask) {
+                myContract = new web3.eth.Contract(SmartContractABI, SmartContractAddress);
+
+
+const account=await getCurrentAccount();
+console.log(account);
+
+                console.log("myContract :", myContract);
+                console.log("Metamask detected!")
+        } else {
+                console.log("Metamask not detected");
+                Swal.fire({
+				  icon: 'error',
+				  title: 'Oops...',
+				  text: 'Metamask not detected!',
+				  onClose() {
+				  	location.reload();
+				  }
+				});
+            }
+        });
+
+
+
+
+
+    </script>
+</body>
+</html>
